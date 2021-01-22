@@ -900,7 +900,7 @@ def antialiasing(scene, win, multi_samples=8, max_peels=4,
 def snapshot(scene, fname=None, size=(300, 300), offscreen=True,
              order_transparent=False, stereo='off',
              multi_samples=8, max_peels=4,
-             occlusion_ratio=0.0):
+             occlusion_ratio=0.0, transparent_bg=False):
     """Save a snapshot of the scene in a file or in memory.
 
     Parameters
@@ -936,6 +936,9 @@ def snapshot(scene, fname=None, size=(300, 300), offscreen=True,
         Maximum number of peels for depth peeling (Default 4).
     occlusion_ratio : float
         Occlusion ration for depth peeling (Default 0 - exact image).
+    transparent_bg : bool
+        Enable transparent background.
+
 
     Returns
     -------
@@ -958,10 +961,17 @@ def snapshot(scene, fname=None, size=(300, 300), offscreen=True,
         antialiasing(scene, render_window, multi_samples, max_peels,
                      occlusion_ratio)
 
+    if transparent_bg:
+        render_window.SetAlphaBitPlanes(1)
+
     render_window.Render()
 
     window_to_image_filter = vtk.vtkWindowToImageFilter()
     window_to_image_filter.SetInput(render_window)
+
+    if transparent_bg:
+        window_to_image_filter.SetInputBufferTypeToRGBA()
+
     window_to_image_filter.Update()
 
     vtk_image = window_to_image_filter.GetOutput()

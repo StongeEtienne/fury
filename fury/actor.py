@@ -908,17 +908,24 @@ def _odf_slicer_mapper(odfs, affine=None, mask=None, sphere=None, scale=2.2,
     all_xyz = []
     all_faces = []
     all_ms = []
+    all_m_scales = []
     for (k, center) in enumerate(ijk):
 
         m = odfs[tuple(center.astype(np.int))].copy()
 
+        if radial_scale is True:
+            m_scale = m.copy()
+        elif radial_scale is False:
+            m_scale = np.ones_like(m)
+        else:
+            m_scale = radial_scale[tuple(center.astype(np.int))]
+
         if norm:
             m /= np.abs(m).max()
+            m_scale /= np.abs(m_scale).max()
 
-        if radial_scale:
-            xyz = vertices * m[:, None]
-        else:
-            xyz = vertices.copy()
+        xyz = vertices * m_scale[:, None]
+        all_m_scales.append(m_scale)
 
         all_xyz.append(scale * xyz + center)
         all_faces.append(faces + k * xyz.shape[0])
@@ -1121,7 +1128,7 @@ def _tensor_slicer_mapper(evals, evecs, affine=None, mask=None, sphere=None,
 
     if scalar_colors is None:
         from dipy.reconst.dti import color_fa, fractional_anisotropy
-        cfa = color_fa(fractional_anisotropy(evals), evecs)
+        cfa = color_fa(fractional_anisotropy(evals)**0.5, evecs)
     else:
         cfa = _makeNd(scalar_colors, 4)
 
