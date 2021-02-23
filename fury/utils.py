@@ -226,11 +226,20 @@ def lines_to_vtk_polydata(lines, colors=None):
     points_per_line = [len(lines[i]) for i in lines_range]
     points_per_line = np.array(points_per_line, np.intp)
     color_is_scalar = False
-    if colors is None or colors is False:
+    if not colors:
         # set automatic rgb colors
         cols_arr = line_colors(lines)
         colors_mapper = np.repeat(lines_range, points_per_line, axis=0)
         vtk_colors = numpy_to_vtk_colors(255 * cols_arr[colors_mapper])
+    elif colors is True:
+        cols_arr = np.zeros_like(points_array)
+        cols_arr[1:] = np.diff(points_array, axis=0)
+        cols_arr[0] = cols_arr[1]
+        offsets = np.cumsum(points_per_line)
+        cols_arr[offsets[:-1]] = cols_arr[offsets[:-1]+1]
+        cols_arr[offsets-1] = cols_arr[offsets-2]
+        cols_arr = np.abs(cols_arr) / np.sqrt(np.sum(np.square(cols_arr), axis=1, keepdims=True))
+        vtk_colors = numpy_to_vtk_colors(255 * cols_arr)
     else:
         cols_arr = np.asarray(colors)
         if cols_arr.dtype == np.object:  # colors is a list of colors

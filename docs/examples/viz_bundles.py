@@ -70,6 +70,16 @@ window.record(scene, out_path='bundle1.png', size=(600, 600))
 scene.camera_info()
 
 ###############################################################################
+# Show every streamlines point with the local segment orientation (RGB for xyz)
+# =================================================================
+#
+# Here we will need to input the ``fa`` map in ``streamtube`` or ``line``.
+
+scene.clear()
+stream_actor2 = actor.line(bundle_native, colors=True)
+
+
+###############################################################################
 # Show every point with a value from a volume with default colormap
 # =================================================================
 #
@@ -77,6 +87,11 @@ scene.camera_info()
 
 scene.clear()
 stream_actor2 = actor.line(bundle_native, fa, linewidth=0.1)
+
+if interactive:
+    window.show(scene, size=(600, 600), reset_camera=False)
+
+window.record(scene, out_path='bundlergb.png', size=(600, 600))
 
 ###############################################################################
 # We can also show the scalar bar.
@@ -90,6 +105,7 @@ if interactive:
     window.show(scene, size=(600, 600), reset_camera=False)
 
 window.record(scene, out_path='bundle2.png', size=(600, 600))
+
 
 ##############################################################################
 # Show every point with a value from a volume with your colormap
